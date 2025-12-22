@@ -315,7 +315,7 @@ class WikoDefectAnalyzerGPT52:
             rca_result = await self._run_rca_agent(
                 vision_classification,
                 production_data,
-                reasoning_effort="xhigh"  # Maximum reasoning for root cause
+                reasoning_effort="medium"  # Balanced reasoning (faster than xhigh)
             )
             total_reasoning_tokens += rca_result.get("_reasoning_tokens", 0)
         
@@ -460,20 +460,30 @@ class WikoDefectAnalyzerGPT52:
             max_completion_tokens=2000,
             response_format={"type": "json_object"},
             # GPT-5.2 specific parameters
-            reasoning_effort=reasoning_effort,
-            verbosity=self.default_verbosity
+            reasoning_effort=reasoning_effort
+            # verbosity parameter may not be supported by all deployments
         )
-        
-        result = json.loads(response.choices[0].message.content)
-        
+
+        # Extract content - GPT-5.2 may have different response structure
+        content = response.choices[0].message.content
+
+        # Debug logging
+        if not content or content.strip() == "":
+            raise ValueError(f"GPT-5.2 returned empty response. Full response: {response}")
+
+        try:
+            result = json.loads(content)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"GPT-5.2 returned invalid JSON. Content: {content[:500]}... Error: {str(e)}")
+
         # Track reasoning tokens if available
         if hasattr(response, 'usage') and hasattr(response.usage, 'completion_tokens_details'):
             result["_reasoning_tokens"] = getattr(
-                response.usage.completion_tokens_details, 
-                'reasoning_tokens', 
+                response.usage.completion_tokens_details,
+                'reasoning_tokens',
                 0
             )
-        
+
         return result
     
     async def _run_rca_agent(
@@ -575,8 +585,8 @@ class WikoDefectAnalyzerGPT52:
             max_completion_tokens=3000,
             response_format={"type": "json_object"},
             # GPT-5.2 xhigh reasoning for deep analysis
-            reasoning_effort=reasoning_effort,
-            verbosity="high"  # Want detailed reasoning for RCA
+            reasoning_effort=reasoning_effort
+            # verbosity parameter may not be supported
         )
         
         result = json.loads(response.choices[0].message.content)
