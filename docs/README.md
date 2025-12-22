@@ -72,15 +72,14 @@ This platform provides real-time defect detection, classification, and root caus
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/tonesgainz/wiko-defect-analyzer-clean.git
-cd wiko-defect-analyzer-clean
+git clone https://github.com/wiko-cutlery/defect-analyzer.git
+cd wiko-defect-analyzer
 
-# Run setup script
-./scripts/setup.sh
-
-# Or manually:
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -130,11 +129,8 @@ AZURE_REPORTS_DEPLOYMENT=gpt-4-1-mini-reports
 ### 4. Run the API
 
 ```bash
-# Using the start script
-./scripts/start_server.sh
-
-# Or directly
-python run_server.py
+cd api
+python app.py
 ```
 
 API will be available at `http://localhost:5000`
@@ -142,12 +138,9 @@ API will be available at `http://localhost:5000`
 ### 5. Test Analysis
 
 ```bash
-# Use the test script
-./scripts/test_api.sh
-
-# Or manually test single image analysis
+# Single image analysis
 curl -X POST http://localhost:5000/api/v1/analyze \
-  -F "image=@test_images/test_knife.jpg" \
+  -F "image=@test_image.jpg" \
   -F "product_sku=WK-KN-200" \
   -F "facility=yangjiang"
 ```
@@ -321,33 +314,7 @@ Integration with:
 ### Running Tests
 
 ```bash
-# Activate virtual environment
-source venv/bin/activate
-
-# Run all tests
 pytest tests/ -v
-
-# Run specific test
-pytest tests/test_connection.py -v
-```
-
-### Project Structure
-
-```plaintext
-wiko-defect-analyzer-clean/
-├── agents/              # AI agent implementations
-├── views/               # API route handlers
-├── tests/               # Test files
-├── scripts/             # Setup and utility scripts
-├── docs/                # Documentation
-├── frontend/            # Web UI (React/Vite)
-├── test_images/         # Sample images for testing
-├── logs/                # Application logs
-├── reports/             # Generated reports
-├── app.py               # Flask application
-├── run_server.py        # Server entry point
-├── config.py            # Configuration
-└── requirements.txt     # Python dependencies
 ```
 
 ### Adding New Defect Types
