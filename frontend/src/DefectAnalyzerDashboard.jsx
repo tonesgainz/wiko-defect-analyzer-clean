@@ -261,57 +261,108 @@ export default function DefectAnalyzerDashboard() {
                     </div>
                   </div>
 
-                  {analysisResult.defect_detected && (
-                    <>
-                      {/* Defect Details */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-700/50 rounded-lg p-3">
-                          <p className="text-xs text-gray-400 mb-1">Defect Type</p>
-                          <p className="font-medium capitalize">
-                            {analysisResult.defect_type.replace(/_/g, ' ')}
-                          </p>
-                        </div>
-                        <div className="bg-gray-700/50 rounded-lg p-3">
-                          <p className="text-xs text-gray-400 mb-1">Severity</p>
-                          <div className="flex items-center gap-2">
-                            <span className={`w-3 h-3 rounded-full ${getSeverityColor(analysisResult.severity)}`}></span>
-                            <span className="font-medium capitalize">{analysisResult.severity}</span>
-                          </div>
-                        </div>
+                  {/* Analysis Details - Always show */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-700/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400 mb-1">Defect Type</p>
+                      <p className="font-medium capitalize">
+                        {analysisResult.defect_type.replace(/_/g, ' ')}
+                      </p>
+                    </div>
+                    <div className="bg-gray-700/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400 mb-1">Severity</p>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full ${getSeverityColor(analysisResult.severity)}`}></span>
+                        <span className="font-medium capitalize">{analysisResult.severity}</span>
                       </div>
+                    </div>
+                  </div>
 
-                      {/* Description */}
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <p className="text-xs text-gray-400 mb-1">Description</p>
-                        <p className="text-sm">{analysisResult.description}</p>
+                  {/* Description */}
+                  {analysisResult.description && (
+                    <div className="bg-gray-700/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400 mb-1">Description</p>
+                      <p className="text-sm">{analysisResult.description}</p>
+                    </div>
+                  )}
+
+                  {/* Affected Area */}
+                  {analysisResult.affected_area && (
+                    <div className="bg-gray-700/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400 mb-1">Affected Area</p>
+                      <p className="text-sm capitalize">{analysisResult.affected_area}</p>
+                    </div>
+                  )}
+
+                  {/* Root Cause Analysis */}
+                  {analysisResult.root_cause && (
+                    <div className="bg-gray-700/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                        <Wrench className="w-3 h-3" />
+                        Root Cause Analysis
+                      </p>
+                      <p className="text-sm font-medium mb-2">{analysisResult.root_cause}</p>
+                      {analysisResult.probable_stage && (
+                        <>
+                          <p className="text-xs text-gray-400 mb-1 mt-3">Probable Stage</p>
+                          <p className="text-sm capitalize">{analysisResult.probable_stage?.replace(/_/g, ' ')}</p>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 5-Why Analysis */}
+                  {analysisResult.five_why_chain && analysisResult.five_why_chain.length > 0 && (
+                    <div className="bg-gray-700/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400 mb-2">5-Why Analysis Chain</p>
+                      <ol className="space-y-2">
+                        {analysisResult.five_why_chain.map((why, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="text-blue-400 font-semibold">Why {i + 1}:</span>
+                            <span className="flex-1">{why}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+
+                  {/* Ishikawa (Fishbone) Analysis */}
+                  {analysisResult.ishikawa_analysis && (
+                    <div className="bg-gray-700/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400 mb-3">Ishikawa (Fishbone) Analysis</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {Object.entries(analysisResult.ishikawa_analysis).map(([category, description]) => (
+                          description && (
+                            <div key={category} className="bg-gray-800/50 rounded p-2">
+                              <p className="text-xs font-semibold text-yellow-400 capitalize mb-1">{category}</p>
+                              <p className="text-xs text-gray-300">{description}</p>
+                            </div>
+                          )
+                        ))}
                       </div>
+                    </div>
+                  )}
 
-                      {/* Root Cause */}
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                          <Wrench className="w-3 h-3" />
-                          Root Cause Analysis
-                        </p>
-                        <p className="text-sm font-medium mb-2">{analysisResult.root_cause}</p>
-                        <p className="text-xs text-gray-400 mb-1">Probable Stage</p>
-                        <p className="text-sm capitalize">{analysisResult.probable_stage?.replace(/_/g, ' ')}</p>
-                      </div>
+                  {/* Contributing Factors */}
+                  {analysisResult.contributing_factors && analysisResult.contributing_factors.length > 0 && (
+                    <div className="bg-gray-700/50 rounded-lg p-3">
+                      <p className="text-xs text-gray-400 mb-2">Contributing Factors</p>
+                      <ul className="space-y-1">
+                        {analysisResult.contributing_factors.map((factor, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="text-yellow-500 mt-1">•</span>
+                            {factor}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                      {/* Contributing Factors */}
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <p className="text-xs text-gray-400 mb-2">Contributing Factors</p>
-                        <ul className="space-y-1">
-                          {analysisResult.contributing_factors.map((factor, i) => (
-                            <li key={i} className="text-sm flex items-start gap-2">
-                              <span className="text-yellow-500 mt-1">•</span>
-                              {factor}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="grid grid-cols-1 gap-4">
+                  {/* Actions */}
+                  {((analysisResult.corrective_actions && analysisResult.corrective_actions.length > 0) ||
+                    (analysisResult.preventive_actions && analysisResult.preventive_actions.length > 0)) && (
+                    <div className="grid grid-cols-1 gap-4">
+                      {analysisResult.corrective_actions && analysisResult.corrective_actions.length > 0 && (
                         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
                           <p className="text-xs text-red-400 mb-2 font-medium">Corrective Actions (Immediate)</p>
                           <ul className="space-y-1">
@@ -323,6 +374,8 @@ export default function DefectAnalyzerDashboard() {
                             ))}
                           </ul>
                         </div>
+                      )}
+                      {analysisResult.preventive_actions && analysisResult.preventive_actions.length > 0 && (
                         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
                           <p className="text-xs text-blue-400 mb-2 font-medium">Preventive Actions (Long-term)</p>
                           <ul className="space-y-1">
@@ -334,14 +387,41 @@ export default function DefectAnalyzerDashboard() {
                             ))}
                           </ul>
                         </div>
-                      </div>
-                    </>
+                      )}
+                    </div>
                   )}
 
-                  {/* Metadata */}
-                  <div className="text-xs text-gray-500 pt-2 border-t border-gray-700">
-                    <p>ID: {analysisResult.defect_id}</p>
-                    <p>Analyzed: {new Date(analysisResult.timestamp).toLocaleString()}</p>
+                  {/* Model & Performance Metadata */}
+                  <div className="bg-gray-700/30 rounded-lg p-3 border border-gray-600">
+                    <p className="text-xs font-semibold text-gray-400 mb-2">GPT Analysis Metadata</p>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <p className="text-gray-500">Model</p>
+                        <p className="text-gray-300 font-mono">{analysisResult.model_version || 'gpt-5.2'}</p>
+                      </div>
+                      {analysisResult.reasoning_tokens_used > 0 && (
+                        <div>
+                          <p className="text-gray-500">Reasoning Tokens</p>
+                          <p className="text-blue-400 font-mono">{analysisResult.reasoning_tokens_used.toLocaleString()}</p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-gray-500">Defect ID</p>
+                        <p className="text-gray-300 font-mono">{analysisResult.defect_id}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Analyzed</p>
+                        <p className="text-gray-300">{new Date(analysisResult.timestamp).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Facility</p>
+                        <p className="text-gray-300 capitalize">{analysisResult.facility}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Product SKU</p>
+                        <p className="text-gray-300 font-mono">{analysisResult.product_sku}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
