@@ -325,6 +325,19 @@ class WikoDefectAnalyzerGPT52:
             rca_result
         )
         
+        # Helper to parse production stage (handles both uppercase and lowercase)
+        probable_stage = None
+        if rca_result and rca_result.get("probable_stage"):
+            stage_value = rca_result["probable_stage"].lower()
+            try:
+                probable_stage = ProductionStage(stage_value)
+            except ValueError:
+                # If still invalid, try to find by name
+                try:
+                    probable_stage = ProductionStage[rca_result["probable_stage"].upper()]
+                except KeyError:
+                    probable_stage = None
+
         # Compile final analysis
         return DefectAnalysis(
             defect_id=defect_id,
@@ -333,13 +346,13 @@ class WikoDefectAnalyzerGPT52:
             product_sku=product_sku,
             image_url=image_path,
             defect_detected=vision_classification.get("defect_detected", False),
-            defect_type=DefectType(vision_classification.get("defect_type", "unknown")),
-            severity=Severity(vision_classification.get("severity", "cosmetic")),
+            defect_type=DefectType(vision_classification.get("defect_type", "unknown").lower()),
+            severity=Severity(vision_classification.get("severity", "cosmetic").lower()),
             confidence=vision_classification.get("confidence", 0.0),
             description=vision_classification.get("description", ""),
             affected_area=vision_classification.get("affected_area", ""),
             bounding_box=vision_classification.get("bounding_box"),
-            probable_stage=ProductionStage(rca_result["probable_stage"]) if rca_result and rca_result.get("probable_stage") else None,
+            probable_stage=probable_stage,
             root_cause=rca_result.get("root_cause", "") if rca_result else "",
             five_why_chain=rca_result.get("five_why_chain", []) if rca_result else [],
             contributing_factors=rca_result.get("contributing_factors", []) if rca_result else [],
@@ -444,7 +457,7 @@ class WikoDefectAnalyzerGPT52:
                     ]
                 }
             ],
-            max_tokens=2000,
+            max_completion_tokens=2000,
             response_format={"type": "json_object"},
             # GPT-5.2 specific parameters
             reasoning_effort=reasoning_effort,
@@ -559,7 +572,7 @@ class WikoDefectAnalyzerGPT52:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content}
             ],
-            max_tokens=3000,
+            max_completion_tokens=3000,
             response_format={"type": "json_object"},
             # GPT-5.2 xhigh reasoning for deep analysis
             reasoning_effort=reasoning_effort,
@@ -644,7 +657,7 @@ class WikoDefectAnalyzerGPT52:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": context}
             ],
-            max_tokens=1500,
+            max_completion_tokens=1500,
             response_format={"type": "json_object"}
         )
         

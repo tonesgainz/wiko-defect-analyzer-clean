@@ -222,7 +222,7 @@ export default function DefectAnalyzerDashboard() {
                 {isAnalyzing ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Analyzing with GPT-4.1...
+                    Analyzing with GPT-5.2...
                   </>
                 ) : (
                   <>

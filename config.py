@@ -4,7 +4,7 @@ Wiko Defect Analyzer Configuration
 Centralized configuration and data for the application.
 """
 
-from agents.defect_analyzer import DefectType, ProductionStage
+from agents.defect_analyzer_gpt52 import DefectType, ProductionStage
 
 class Config:
     """Application configuration"""
