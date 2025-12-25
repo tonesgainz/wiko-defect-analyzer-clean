@@ -34,6 +34,11 @@ Thumbs.db
 # Logs
 *.log
 logs/
+results/
+incoming_images/
+archive/
+processed/
+*.error.json
 
 # Testing
 .pytest_cache/
