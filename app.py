@@ -69,7 +69,7 @@ def server_error(e):
 
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5001)) # Changed port to 5001
+    port = int(os.getenv("PORT", "8080"))
     debug = os.getenv('FLASK_DEBUG', '0') == '1'
     
     print(f"""
