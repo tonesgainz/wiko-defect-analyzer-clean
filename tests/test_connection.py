@@ -8,7 +8,16 @@ Run this to verify your Azure AI Foundry setup is working.
 import os
 import sys
 import json
+import pytest
 from dotenv import load_dotenv
+
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(
+        os.getenv("RUN_AZURE_INTEGRATION") != "1",
+        reason="Set RUN_AZURE_INTEGRATION=1 to run live Azure OpenAI integration tests",
+    ),
+]
 
 # Load environment variables
 load_dotenv()
@@ -59,9 +68,9 @@ def check_env_vars():
     if missing:
         print(f"\n❌ Missing required variables: {missing}")
         print("   Please edit .env file with your Azure credentials.")
-        return False
+        assert False
     
-    return True
+    assert True
 
 def test_openai_connection():
     """Test connection to Azure OpenAI"""
@@ -110,7 +119,7 @@ def test_openai_connection():
         if response.usage:
             print(f"  ℹ️  Tokens used: {response.usage.total_tokens}")
         
-        return True
+        assert True
         
     except Exception as e:
         print(f"  ❌ Connection failed: {str(e)}")
@@ -129,7 +138,7 @@ def test_openai_connection():
             print("     Go to Azure AI Foundry → Models + endpoints")
             print("     Check your deployment name and update .env")
         
-        return False
+        assert False
 
 def test_vision_capability():
     """Test multimodal (vision) capability with a simple test"""
@@ -192,12 +201,12 @@ def test_vision_capability():
         
         result = response.choices[0].message.content
         print(f"  ✅ Vision test passed. Response: {result}")
-        return True
+        assert True
         
     except Exception as e:
         print(f"  ⚠️  Vision test skipped or failed: {str(e)[:100]}")
         print("     (This is optional - text analysis will still work)")
-        return True  # Don't fail the whole test for this
+        assert True  # Don't fail the whole test for this
 
 def test_reasoning_effort():
     """Test that reasoning_effort parameter works"""
@@ -251,11 +260,11 @@ def test_reasoning_effort():
             else:
                 raise e
         
-        return True
+        assert True
         
     except Exception as e:
         print(f"  ❌ Reasoning effort test failed: {str(e)}")
-        return False
+        assert False
 
 def main():
     print_header()

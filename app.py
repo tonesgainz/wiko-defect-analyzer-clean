@@ -12,6 +12,7 @@ from flask_cors import CORS
 from config import Config
 from views.analysis import analysis_bp
 from views.metadata import metadata_bp
+from views.ingest import ingest_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -22,6 +23,7 @@ app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
 # Register Blueprints
 app.register_blueprint(analysis_bp, url_prefix='/api/v1')
 app.register_blueprint(metadata_bp, url_prefix='/api/v1')
+app.register_blueprint(ingest_bp, url_prefix='/api/v1')
 
 
 @app.route('/', methods=['GET'])
@@ -36,6 +38,7 @@ def index():
             "GET /api/v1/defect-types": "List defect classifications",
             "GET /api/v1/production-stages": "List production stages",
             "GET /api/v1/facilities": "List Wiko facilities",
+            "POST /api/v1/ingest": "Async ingest image + metadata (stores blob, enqueues queue job)",
             "POST /api/v1/analyze": "Analyze single image (requires: image, product_sku)",
             "POST /api/v1/analyze/batch": "Batch image analysis",
             "POST /api/v1/shift-report": "Generate shift report"
@@ -60,7 +63,8 @@ def health_check():
 
 @app.errorhandler(413)
 def too_large(e):
-    return jsonify({"error": "File too large. Maximum size is 16MB."}), 413
+    max_mb = Config.MAX_CONTENT_LENGTH // (1024 * 1024)
+    return jsonify({"error": f"File too large. Maximum size is {max_mb}MB."}), 413
 
 
 @app.errorhandler(500)

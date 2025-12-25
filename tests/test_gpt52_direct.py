@@ -6,8 +6,17 @@ Tests the Azure OpenAI connection and GPT-5.2 deployment directly
 
 import os
 import sys
+import pytest
 from dotenv import load_dotenv
 from openai import AzureOpenAI
+
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(
+        os.getenv("RUN_AZURE_INTEGRATION") != "1",
+        reason="Set RUN_AZURE_INTEGRATION=1 to run live Azure OpenAI integration tests",
+    ),
+]
 
 load_dotenv()
 
@@ -68,7 +77,7 @@ def test_azure_connection():
         print("=" * 60)
         print("  ✓ SUCCESS - GPT-5.2 is working correctly!")
         print("=" * 60)
-        return True
+        assert True
 
     except Exception as e:
         print()
@@ -94,7 +103,7 @@ def test_azure_connection():
             print("  • Check Azure AI Foundry for available deployments")
             print("  • Update AZURE_VISION_DEPLOYMENT in .env file")
 
-        return False
+        assert False
 
 if __name__ == "__main__":
     success = test_azure_connection()

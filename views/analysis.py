@@ -8,6 +8,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from agents.defect_analyzer_gpt52 import WikoDefectAnalyzerGPT52, DefectAnalysis, DefectType, Severity, ProductionStage
 from config import Config
+from analyzer_core import analyze_image_bytes
 
 analysis_bp = Blueprint('analysis_bp', __name__)
 analyzer = WikoDefectAnalyzerGPT52()
@@ -44,22 +45,17 @@ def analyze_defect():
     # Save uploaded file to temporary location
     temp_fd, temp_path = tempfile.mkstemp(suffix='.jpg')
     try:
-        os.write(temp_fd, file.read())
+        image_bytes = file.read()
+        os.write(temp_fd, image_bytes)
         os.close(temp_fd)
 
-        # Run async function in sync context
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(
-            analyzer.analyze_defect(
-                image_path=temp_path,
-                product_sku=product_sku,
-                facility=facility,
-                production_data=production_data
-            )
+        result = analyze_image_bytes(
+            image_bytes,
+            product_sku=product_sku,
+            facility=facility,
+            production_data=production_data,
         )
-        loop.close()
-        return jsonify({"success": True, "analysis": result.to_dict()})
+        return jsonify({"success": True, "analysis": result})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
     finally:

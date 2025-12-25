@@ -1,5 +1,11 @@
 import pytest
-from run_server import app
+
+try:
+    import flask  # noqa: F401
+except ImportError:
+    pytest.skip("flask not installed", allow_module_level=True)
+
+from app import app
 
 @pytest.fixture
 def client():

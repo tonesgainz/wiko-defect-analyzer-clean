@@ -6,8 +6,17 @@ Test just the vision API call without full analysis
 import os
 import json
 import base64
+import pytest
 from dotenv import load_dotenv
 from openai import AzureOpenAI
+
+pytestmark = [
+    pytest.mark.manual,
+    pytest.mark.skipif(
+        os.getenv("RUN_VISION_MANUAL") != "1",
+        reason="Requires local test_knife.jpg and live Azure creds",
+    ),
+]
 
 load_dotenv()
 
@@ -71,12 +80,12 @@ def test_vision_api():
         result = json.loads(content)
         print("Parsed JSON:")
         print(json.dumps(result, indent=2))
-        return True
+        assert True
 
     except Exception as e:
         print(f"✗ FAILED: {type(e).__name__}")
         print(f"Error: {str(e)}")
-        return False
+        pytest.fail(str(e))
 
 if __name__ == "__main__":
     import sys

@@ -1,3 +1,11 @@
+import os
+import pytest
+
+pytestmark = pytest.mark.manual
+
+TEST_IMAGE = os.getenv('TEST_KNIFE_IMAGE', 'test_knife.jpg')
+
+
 #!/usr/bin/env python3
 """
 Direct test of analyze_defect function
@@ -5,6 +13,14 @@ Direct test of analyze_defect function
 
 import asyncio
 import sys
+import pytest
+
+
+try:
+    import azure  # noqa: F401
+except ImportError:
+    pytest.skip("azure SDK not installed", allow_module_level=True)
+
 from agents.defect_analyzer_gpt52 import WikoDefectAnalyzerGPT52
 
 async def test_analyze():
@@ -20,7 +36,7 @@ async def test_analyze():
 
     try:
         result = await analyzer.analyze_defect(
-            image_path="test_knife.jpg",
+            image_path=TEST_IMAGE,
             product_sku="WK-KN-200",
             facility="yangjiang"
         )
@@ -44,10 +60,6 @@ async def test_analyze():
         print(f"Error: {str(e)}")
         import traceback
         traceback.print_exc()
-        return False
+        assert False
 
-    return True
-
-if __name__ == "__main__":
-    success = asyncio.run(test_analyze())
-    sys.exit(0 if success else 1)
+    assert True

@@ -124,6 +124,17 @@ AZURE_AI_API_KEY=your-api-key-here
 AZURE_VISION_DEPLOYMENT=gpt-4-1-vision
 AZURE_REASONING_DEPLOYMENT=o3-mini-reasoning
 AZURE_REPORTS_DEPLOYMENT=gpt-4-1-mini-reports
+AZURE_STORAGE_ACCOUNT_URL=https://yourstorage.blob.core.windows.net
+AZURE_STORAGE_CONTAINER_RAW=raw-images
+AZURE_STORAGE_CONTAINER_PROCESSED=processed-images
+SERVICE_BUS_NAMESPACE_FQDN=your-namespace.servicebus.windows.net
+SERVICE_BUS_QUEUE=defect-jobs
+FAST_MODEL_DEPLOYMENT=gpt-4-1-mini   # fast pass
+FULL_MODEL_DEPLOYMENT=gpt-4-1-vision # full chain
+QUALITY_GATE_ENABLED=true
+# Optional fallbacks if Managed Identity is unavailable:
+AZURE_STORAGE_CONNECTION_STRING=
+SERVICE_BUS_CONNECTION_STRING=
 ```
 
 ### 4. Run the API
@@ -151,12 +162,33 @@ curl -X POST http://localhost:5000/api/v1/analyze \
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| POST | `/api/v1/ingest` | Async ingest: store image to blob and enqueue job |
 | POST | `/api/v1/analyze` | Analyze single image |
 | POST | `/api/v1/analyze/batch` | Batch analysis |
 | POST | `/api/v1/shift-report` | Generate shift report |
 | GET | `/api/v1/defect-types` | List defect classifications |
 | GET | `/api/v1/production-stages` | List production stages |
 | GET | `/api/v1/facilities` | List Wiko facilities |
+
+### Async Ingest (`/api/v1/ingest`)
+
+Uploads an image + required metadata, stores the blob, and enqueues a Service Bus job for async GPT analysis. Returns `202` when accepted.
+
+```bash
+curl -X POST http://localhost:5000/api/v1/ingest \
+  -F "image=@test_image.jpg" \
+  -F "sku=WK-KN-200" \
+  -F "station=final_qc" \
+  -F "line=L1" \
+  -F "shift=A" \
+  -F "lot=LOT-001" \
+  -F "camera_id=CAM-01" \
+  -F "captured_at=2024-12-25T10:00:00Z"
+```
+
+### Worker (Service Bus -> Blob)
+- Consumes messages from `SERVICE_BUS_QUEUE`, downloads raw image from `AZURE_STORAGE_CONTAINER_RAW`, runs the analyzer, validates schema, and writes results JSON to `AZURE_STORAGE_CONTAINER_PROCESSED`.
+- Designed to run as a Container Apps Job (see `infra/deploy_worker_containerapp_job.sh`).
 
 ### Single Image Analysis
 

@@ -6,8 +6,17 @@ Test vision API WITH reasoning_effort parameter
 import os
 import json
 import base64
+import pytest
 from dotenv import load_dotenv
 from openai import AzureOpenAI
+
+pytestmark = [
+    pytest.mark.manual,
+    pytest.mark.skipif(
+        os.getenv("RUN_VISION_MANUAL") != "1",
+        reason="Requires local test_knife.jpg and live Azure creds",
+    ),
+]
 
 load_dotenv()
 
@@ -59,7 +68,7 @@ def test_with_reasoning():
         content = response.choices[0].message.content
         print("✓ SUCCESS with reasoning_effort='high'")
         print(content[:200])
-        return True
+        assert True
 
     except Exception as e:
         print(f"✗ FAILED: {type(e).__name__}")
@@ -86,12 +95,7 @@ def test_with_reasoning():
             content = response.choices[0].message.content
             print("✓ SUCCESS without reasoning_effort")
             print("→ reasoning_effort parameter is NOT supported by this deployment")
-            return False
+            assert True
         except Exception as e2:
             print(f"✗ Also failed without reasoning_effort: {str(e2)}")
-            return False
-
-if __name__ == "__main__":
-    import sys
-    success = test_with_reasoning()
-    sys.exit(0 if success else 1)
+            pytest.fail(str(e2))

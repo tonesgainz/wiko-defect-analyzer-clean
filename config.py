@@ -4,12 +4,23 @@ Wiko Defect Analyzer Configuration
 Centralized configuration and data for the application.
 """
 
+import os
 from agents.defect_analyzer_gpt52 import DefectType, ProductionStage
 
 class Config:
     """Application configuration"""
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+    AZURE_STORAGE_ACCOUNT_URL = os.getenv("AZURE_STORAGE_ACCOUNT_URL")
+    AZURE_STORAGE_CONTAINER_RAW = os.getenv("AZURE_STORAGE_CONTAINER_RAW", "raw-images")
+    AZURE_STORAGE_CONTAINER_PROCESSED = os.getenv("AZURE_STORAGE_CONTAINER_PROCESSED", "processed-images")
+    AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+    SERVICE_BUS_NAMESPACE_FQDN = os.getenv("SERVICE_BUS_NAMESPACE_FQDN")
+    SERVICE_BUS_QUEUE = os.getenv("SERVICE_BUS_QUEUE", "defect-jobs")
+    SERVICE_BUS_CONNECTION_STRING = os.getenv("SERVICE_BUS_CONNECTION_STRING")
+    FAST_MODEL_DEPLOYMENT = os.getenv("FAST_MODEL_DEPLOYMENT")
+    FULL_MODEL_DEPLOYMENT = os.getenv("FULL_MODEL_DEPLOYMENT")
+    QUALITY_GATE_ENABLED = os.getenv("QUALITY_GATE_ENABLED", "true").lower() != "false"
     
     # Using the enums from the agent
     DEFECT_TYPES_DATA = {
